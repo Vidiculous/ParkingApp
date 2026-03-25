@@ -25,6 +25,7 @@ from pydantic import BaseModel, Field
 app = FastAPI(title="Parking Detection System")
 
 DASHBOARD_DIR = Path(__file__).parent.parent / "dashboard"
+DASHBOARD_FILE = Path(__file__).parent / "dashboard.html"
 STATE_FILE = Path(__file__).parent / "state.json"
 TOTAL_SPOTS = 7
 STALE_AFTER_HOURS = 24
@@ -135,9 +136,9 @@ async def websocket_endpoint(ws: WebSocket):
 
 @app.get("/")
 async def dashboard():
-    index = DASHBOARD_DIR / "index.html"
-    if index.exists():
-        return FileResponse(index)
+    for candidate in [DASHBOARD_DIR / "index.html", DASHBOARD_FILE]:
+        if candidate.exists():
+            return FileResponse(candidate)
     return JSONResponse({"error": "dashboard not found"}, status_code=404)
 
 # ── Stale status cleanup ──────────────────────────────────────────────────────
