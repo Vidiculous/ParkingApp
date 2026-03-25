@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.parking.Prefs.backendUrl
 import com.example.parking.Prefs.debugBeaconNearby
 import com.example.parking.Prefs.debugInsideGeofence
+import com.example.parking.Prefs.debugLastGeofenceEvent
 import com.example.parking.Prefs.dongleMinor
 import com.example.parking.Prefs.geoLat
 import com.example.parking.Prefs.geoLng
@@ -241,6 +242,7 @@ class StatusFragment : Fragment() {
                 b.debugGeofence.setTextColor(
                     if (inside) Color.parseColor("#69DB7C") else Color.parseColor("#FF6B6B")
                 )
+                b.debugLastEvent.text = ctx.debugLastGeofenceEvent
                 updateDebugUserMarker(loc.latitude, loc.longitude, inside)
             }
         } catch (_: Exception) {}

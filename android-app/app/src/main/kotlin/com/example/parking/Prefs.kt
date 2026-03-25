@@ -45,6 +45,10 @@ object Prefs {
         get() = sp(this).getBoolean("debug_beacon_nearby", false)
         set(v) { sp(this).edit().putBoolean("debug_beacon_nearby", v).apply() }
 
+    var Context.debugLastGeofenceEvent: String
+        get() = sp(this).getString("debug_last_geo_event", "none") ?: "none"
+        set(v) { sp(this).edit().putString("debug_last_geo_event", v).apply() }
+
     fun Context.hasGeofence(): Boolean {
         val lat = geoLat
         val lng = geoLng
