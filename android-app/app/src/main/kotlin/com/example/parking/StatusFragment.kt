@@ -245,6 +245,15 @@ class StatusFragment : Fragment() {
                 b.debugLastEvent.text = ctx.debugLastGeofenceEvent
                 updateDebugUserMarker(loc.latitude, loc.longitude, inside)
             }
+
+            // Dwell-outside fallback: if app is open and we're outside the geofence
+            // while still showing as parked, scan for beacon and post "left" if found.
+            if (!inside && currentMyEntry?.status == "parked") {
+                val beaconFound = BleScanner.scan(ctx, ctx.dongleMinor, 8_000)
+                if (beaconFound) {
+                    ParkingRepository.postStatus(ctx, "left", manual = false)
+                }
+            }
         } catch (_: Exception) {}
     }
 
