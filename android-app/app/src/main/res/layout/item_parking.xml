@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:padding="12dp"
+    android:minHeight="56dp">
+
+    <!-- Avatar circle -->
+    <TextView
+        android:id="@+id/text_initial"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:background="@drawable/circle_avatar"
+        android:backgroundTint="#22C55E"
+        android:layout_marginEnd="12dp" />
+
+    <!-- Name + dongle -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/text_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary" />
+
+        <TextView
+            android:id="@+id/text_dongle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="@color/grey_500" />
+
+    </LinearLayout>
+
+    <!-- Status + time -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="end">
+
+        <TextView
+            android:id="@+id/badge_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:background="@drawable/badge_parked" />
+
+        <TextView
+            android:id="@+id/text_since"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="11sp"
+            android:textColor="@color/grey_500"
+            android:layout_marginTop="2dp"
+            android:gravity="end" />
+
+        <TextView
+            android:id="@+id/text_manual"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="manual"
+            android:textSize="10sp"
+            android:textColor="@color/grey_400"
+            android:visibility="gone" />
+
+    </LinearLayout>
+</LinearLayout>

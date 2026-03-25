@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="white">#FFFFFF</color>
+    <color name="background">#F5F5F5</color>
+    <color name="text_primary">#1A1A1A</color>
+    <color name="green_50">#F0FDF4</color>
+    <color name="green_500">#22C55E</color>
+    <color name="green_dark">#15803D</color>
+    <color name="grey_400">#9CA3AF</color>
+    <color name="grey_500">#6B7280</color>
+    <color name="grey_600">#4B5563</color>
+    <color name="red_50">#FFF1F2</color>
+    <color name="red_600">#BE123C</color>
+
+    <!-- Material theme colors -->
+    <color name="seed">#1D7A3F</color>
+</resources>

@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background">
+
+    <!-- Toolbar -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:title="Parking Status">
+        <ImageButton
+            android:id="@+id/btn_refresh"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:src="@android:drawable/ic_menu_rotate"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_marginEnd="12dp"
+            android:contentDescription="Refresh" />
+    </com.google.android.material.appbar.MaterialToolbar>
+
+    <!-- Occupancy card -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/occupancy_card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="2dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <View
+                    android:id="@+id/connection_dot"
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:background="@drawable/dot_grey"
+                    android:layout_marginEnd="8dp" />
+
+                <TextView
+                    android:id="@+id/occupancy_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="— / 7 spots occupied"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/green_dark" />
+
+            </LinearLayout>
+
+            <ProgressBar
+                android:id="@+id/occupancy_bar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="8dp"
+                android:layout_marginTop="8dp"
+                android:max="100"
+                android:progress="0"
+                android:progressTint="@color/green_500" />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- My status card -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/my_status_card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="2dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="12dp">
+
+            <TextView
+                android:id="@+id/my_status_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="You are away"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="@color/grey_600" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_toggle"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mark Parked"
+                android:textSize="13sp" />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Debug panel -->
+    <LinearLayout
+        android:id="@+id/debug_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="8dp"
+        android:background="#DD000000"
+        android:padding="10dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="DEBUG"
+            android:textColor="#66FFFFFF"
+            android:textSize="10sp"
+            android:letterSpacing="0.1"
+            android:layout_marginBottom="4dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView android:layout_width="72dp" android:layout_height="wrap_content"
+                android:text="GPS" android:textColor="#80FFFFFF" android:textSize="11sp" />
+            <TextView android:id="@+id/debug_gps"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="waiting…" android:textColor="@color/white" android:textSize="11sp"
+                android:fontFamily="monospace" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView android:layout_width="72dp" android:layout_height="wrap_content"
+                android:text="Distance" android:textColor="#80FFFFFF" android:textSize="11sp" />
+            <TextView android:id="@+id/debug_distance"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="—" android:textColor="@color/white" android:textSize="11sp"
+                android:fontFamily="monospace" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <TextView android:layout_width="72dp" android:layout_height="wrap_content"
+                android:text="Geofence" android:textColor="#80FFFFFF" android:textSize="11sp" />
+            <TextView android:id="@+id/debug_geofence"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="✗ outside" android:textColor="#FF6B6B" android:textSize="11sp"
+                android:fontFamily="monospace" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="6dp">
+            <TextView android:layout_width="72dp" android:layout_height="wrap_content"
+                android:text="Beacon" android:textColor="#80FFFFFF" android:textSize="11sp" />
+            <TextView android:id="@+id/debug_beacon"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="✗ not detected" android:textColor="#FFA94D" android:textSize="11sp"
+                android:fontFamily="monospace" />
+        </LinearLayout>
+
+        <org.osmdroid.views.MapView
+            android:id="@+id/debug_map"
+            android:layout_width="match_parent"
+            android:layout_height="180dp" />
+
+    </LinearLayout>
+
+    <!-- Team list -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/white"
+        android:clipToPadding="false"
+        android:paddingBottom="8dp" />
+
+</LinearLayout>

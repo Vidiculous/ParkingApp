@@ -4,3 +4,31 @@
 
 # build
 /build*/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.python-version
+uv.lock
+
+# Android
+android-app/.gradle/
+android-app/build/
+android-app/app/build/
+android-app/local.properties
+*.apk
+*.aab
+
+# NCS / Zephyr toolchain
+ncs/
+
+# Office temp files
+.~lock.*
+
+# Misc
+*.deb
+com.spotify.Client.flatpakref
+ai-in-our-work*.pptx
