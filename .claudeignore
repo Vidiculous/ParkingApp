@@ -1,0 +1,27 @@
+# Zephyr / west build artifacts
+build/
+.west/
+
+# Python runtime state and caches
+backend/__pycache__/
+backend/state.json
+__pycache__/
+*.pyc
+
+# uv / pip venv
+uv.lock
+.venv/
+
+# NCS toolchain (large)
+ncs/
+
+# Android build output
+android-app/.gradle/
+android-app/build/
+android-app/app/build/
+
+# Misc large binaries / artefacts
+firmware.zip
+*.deb
+*.pptx
+*.flatpakref

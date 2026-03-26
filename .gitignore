@@ -28,6 +28,12 @@ ncs/
 # Office temp files
 .~lock.*
 
+# Firmware build artifacts
+firmware.zip
+
+# uv-generated project stub (backend entry point is backend/main.py)
+/main.py
+
 # Misc
 *.deb
 com.spotify.Client.flatpakref
