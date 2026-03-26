@@ -36,16 +36,9 @@ blinky/
 │   └── requirements.txt
 ├── dashboard/
 │   └── index.html           # live web dashboard (served by backend)
-├── app/                     # Flutter app (iOS + Android)
-│   ├── lib/
-│   │   ├── main.dart
-│   │   ├── parking_service.dart
-│   │   ├── status_screen.dart
-│   │   └── settings_screen.dart
-│   ├── android/app/src/main/AndroidManifest.xml
-│   ├── ios/Runner/Info.plist
-│   └── pubspec.yaml
-├── boards/                  # board overlays
+├── android-app/             # Android app (Kotlin)
+├── boards/                  # board overlays — nrf54l15dk overlay is for a
+│                            #   different chip (nRF54L15); delete it
 ├── build/                   # west build output
 ├── CMakeLists.txt
 ├── prj.conf                 # BLE + GPIO config
@@ -61,12 +54,27 @@ Before building for each dongle, edit two things in `src/main.c` and `prj.conf`:
 
 ## Running the backend
 ```bash
-cd backend
-pip install -r requirements.txt
-python main.py
-# or: uvicorn main:app --host 0.0.0.0 --port 8000
+cd ~/repos/blinky
+uv run uvicorn backend.main:app --host 0.0.0.0 --port 8000
 ```
 Dashboard at http://localhost:8000
+
+### Backend configuration (environment variables)
+| Variable            | Default | Description                                     |
+|---------------------|---------|-------------------------------------------------|
+| `TOTAL_SPOTS`       | `7`     | Number of parking spaces in the lot             |
+| `STALE_AFTER_HOURS` | `24`    | Hours before a parked status becomes unknown    |
+| `PORT`              | `8000`  | TCP port (only used when running via `__main__`)|
+
+## Android app
+
+See `android-app/` — standard Gradle project, open in Android Studio or build with:
+```bash
+cd android-app
+./gradlew assembleDebug
+```
+
+> Grant "Allow all the time" for location and disable battery optimisation for the app so background geofencing works reliably.
 
 ## Test the backend
 ```bash
@@ -119,8 +127,6 @@ The dongle has no J-Link. Flash via USB DFU:
 - [ ] Confirm firmware build succeeds with `nrf52840dongle/nrf52840` target
 - [ ] Confirm nrfutil standalone binary is installed and on PATH
 - [ ] Verify iBeacon visible in nRF Connect app after flashing
-- [ ] Install Flutter SDK and run `flutter pub get` inside `app/`
 - [ ] Set backend URL to LAN IP (not localhost) in app settings so phones can reach it
 - [ ] Android: prompt users to disable battery optimisation for the app
-- [ ] iOS: distribute via TestFlight (requires Apple Developer account, $99/yr)
-- [ ] The `boards/nrf54l15dk_nrf54l15_cpuapp_hpf_gpio.overlay` is for a different chip — safe to ignore or delete
+- [ ] Delete `boards/nrf54l15dk_nrf54l15_cpuapp_hpf_gpio.overlay` — it targets the nRF54L15, not the nRF52840 used here. West ignores it (board name mismatch) but it causes confusion.
