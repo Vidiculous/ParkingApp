@@ -37,8 +37,6 @@ ParkingApp/
 ├── dashboard/
 │   └── index.html           # live web dashboard (served by backend)
 ├── android-app/             # Android app (Kotlin)
-├── boards/                  # board overlays — nrf54l15dk overlay is for a
-│                            #   different chip (nRF54L15); delete it
 ├── build/                   # west build output
 ├── CMakeLists.txt
 ├── prj.conf                 # BLE + GPIO config
@@ -129,4 +127,3 @@ The dongle has no J-Link. Flash via USB DFU:
 - [ ] Verify iBeacon visible in nRF Connect app after flashing
 - [ ] Set backend URL to LAN IP (not localhost) in app settings so phones can reach it
 - [ ] Android: prompt users to disable battery optimisation for the app
-- [ ] Delete `boards/nrf54l15dk_nrf54l15_cpuapp_hpf_gpio.overlay` — it targets the nRF54L15, not the nRF52840 used here. West ignores it (board name mismatch) but it causes confusion.
