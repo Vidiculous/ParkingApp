@@ -28,7 +28,7 @@ export PATH=~/bin:~/ncs/toolchains/2ac5840438/opt/zephyr-sdk/arm-zephyr-eabi/bin
 
 ## Project structure
 ```
-blinky/
+ParkingApp/
 ├── src/
 │   └── main.c               # iBeacon firmware (change BEACON_MINOR per dongle)
 ├── backend/
@@ -54,7 +54,7 @@ Before building for each dongle, edit two things in `src/main.c` and `prj.conf`:
 
 ## Running the backend
 ```bash
-cd ~/repos/blinky
+cd ~/repos/ParkingApp
 uv run uvicorn backend.main:app --host 0.0.0.0 --port 8000
 ```
 Dashboard at http://localhost:8000
@@ -89,7 +89,7 @@ curl -X POST http://localhost:8000/api/park \
 
 ## Build
 ```bash
-cd ~/repos/blinky
+cd ~/repos/ParkingApp
 uv run west build -b nrf52840dongle/nrf52840
 ```
 
