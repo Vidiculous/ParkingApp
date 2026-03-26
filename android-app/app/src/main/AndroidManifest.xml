@@ -20,6 +20,9 @@
     <!-- Re-register geofence after reboot -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+    <!-- Notifications (Android 13+) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <!-- Backend HTTP/WS -->
     <uses-permission android:name="android.permission.INTERNET" />
 

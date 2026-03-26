@@ -1,7 +1,9 @@
 package com.example.parking
 
+import android.app.NotificationManager
 import android.content.Context
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import com.example.parking.Prefs.backendUrl
 import com.example.parking.Prefs.dongleId
 import com.example.parking.Prefs.userName
@@ -14,6 +16,7 @@ import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 
 private const val TAG = "PARK_REPO"
+private const val NOTIF_ID_PARKING_EVENT = 3
 
 data class ParkingEntry(
     val name: String,
@@ -41,6 +44,10 @@ object ParkingRepository {
         .build()
 
     private val JSON = "application/json".toMediaType()
+
+    // Tracks the last known status for the current user; null until first WS message is received.
+    // null → first message after connect (initial state snapshot, not a transition event)
+    private var previousMyStatus: String? = null
 
     // ── HTTP POST ─────────────────────────────────────────────────────────────
 
@@ -95,6 +102,9 @@ object ParkingRepository {
         val url = context.backendUrl.replace(Regex("^http"), "ws") + "/ws"
         val request = Request.Builder().url(url).build()
 
+        // Reset so the first message after (re)connect is treated as initial state, not a transition
+        previousMyStatus = null
+
         return client.newWebSocket(request, object : WebSocketListener() {
             override fun onOpen(webSocket: WebSocket, response: Response) {
                 Log.d(TAG, "WS connected to $url")
@@ -103,7 +113,9 @@ object ParkingRepository {
 
             override fun onMessage(webSocket: WebSocket, text: String) {
                 try {
-                    onUpdate(parseState(text))
+                    val state = parseState(text)
+                    onUpdate(state)
+                    maybeNotifyStatusChange(context, state)
                 } catch (e: Exception) {
                     Log.w(TAG, "WS parse error: ${e.message}")
                 }
@@ -119,6 +131,34 @@ object ParkingRepository {
                 onConnectionChange(false)
             }
         })
+    }
+
+    private fun maybeNotifyStatusChange(context: Context, state: ParkingState) {
+        val myName = context.userName
+        if (myName.isBlank()) return
+
+        val myNewStatus = state.users.find { it.name == myName }?.status
+        val prev = previousMyStatus
+        previousMyStatus = myNewStatus
+
+        // prev == null means this is the first message (initial snapshot) — skip notification
+        if (prev == null || myNewStatus == null) return
+        if (prev == myNewStatus) return
+        if (myNewStatus != "parked" && myNewStatus != "left") return
+
+        val title = if (myNewStatus == "parked") "You are now parked" else "Parking unregistered"
+        val text = "${state.occupancy.parked} / ${state.occupancy.total} spots occupied"
+        Log.d(TAG, "Notifying status change: $prev → $myNewStatus")
+
+        val notif = NotificationCompat.Builder(context, "parking_events")
+            .setContentTitle(title)
+            .setContentText(text)
+            .setSmallIcon(android.R.drawable.ic_menu_mylocation)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true)
+            .build()
+        (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
+            .notify(NOTIF_ID_PARKING_EVENT, notif)
     }
 
     private fun parseState(json: String): ParkingState {
