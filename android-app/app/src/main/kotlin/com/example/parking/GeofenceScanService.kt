@@ -15,6 +15,7 @@ import kotlinx.coroutines.*
 private const val TAG = "PARK_SVC"
 private const val CHANNEL_ID = "parking_scan"
 private const val NOTIF_ID = 1
+private const val NOTIF_ID_PARKING_EVENT = 3
 
 class GeofenceScanService : Service() {
 
@@ -83,14 +84,29 @@ class GeofenceScanService : Service() {
         val result = ParkingRepository.postStatus(this, status, manual = false)
         Log.d(TAG, "POST $status → $result")
 
-        if (result is PostResult.OkWithWarning && result.warning == "lot_full") {
-            showLotFullNotification()
+        when {
+            result is PostResult.OkWithWarning && result.warning == "lot_full" ->
+                showLotFullNotification()
+            result is PostResult.Ok || result is PostResult.OkWithWarning ->
+                showParkingEventNotification(status)
         }
     }
 
     private val dongleMinor: Int get() {
         val prefs = getSharedPreferences("parking_prefs", Context.MODE_PRIVATE)
         return prefs.getInt("dongle_minor", 1)
+    }
+
+    private fun showParkingEventNotification(status: String) {
+        val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val title = if (status == "parked") "You are now parked" else "Parking unregistered"
+        val notif = NotificationCompat.Builder(this, "parking_events")
+            .setContentTitle(title)
+            .setSmallIcon(android.R.drawable.ic_menu_mylocation)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true)
+            .build()
+        nm.notify(NOTIF_ID_PARKING_EVENT, notif)
     }
 
     private fun showLotFullNotification() {
