@@ -32,6 +32,12 @@ echo ""
 echo "Building…"
 uv run west build -b nrf52840dongle/nrf52840
 
+HEX="build/ParkingApp/zephyr/zephyr.hex"
+if [[ ! -f "$HEX" ]]; then
+    echo "Error: build succeeded but $HEX not found. Check west build output above." >&2
+    exit 1
+fi
+
 # ── Detect port ───────────────────────────────────────────────────────────────
 
 echo ""
@@ -67,12 +73,21 @@ echo "Packaging firmware…"
 nrfutil pkg generate \
     --hw-version 52 \
     --sd-req=0x00 \
-    --application build/zephyr/zephyr.hex \
+    --application "$HEX" \
     --application-version 1 \
     firmware.zip
 
+if [[ ! -f firmware.zip ]]; then
+    echo "Error: nrfutil pkg generate failed — firmware.zip was not created." >&2
+    exit 1
+fi
+
 echo "Flashing to $PORT…"
 nrfutil dfu usb-serial -pkg firmware.zip -p "$PORT"
+if [[ $? -ne 0 ]]; then
+    echo "Error: flashing failed." >&2
+    exit 1
+fi
 
 echo ""
 echo "Done. $DEVICE_NAME flashed successfully."
