@@ -24,7 +24,7 @@ static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED_NODE, gpios);
 
 /* ── iBeacon parameters ──────────────────────────────────────────────── */
 #define BEACON_MAJOR      1
-#define BEACON_MINOR      1   /* change per dongle: 1–10 */
+#define BEACON_MINOR      2   /* change per dongle: 1–10 */
 #define BEACON_TX_POWER   (-59) /* calibrated RSSI at 1 m */
 
 /*
