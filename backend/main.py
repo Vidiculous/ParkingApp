@@ -10,6 +10,8 @@ Endpoints:
 
 import asyncio
 import json
+import logging
+import os
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Annotated, Literal
@@ -20,6 +22,12 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
+log = logging.getLogger(__name__)
+
 # ── App ──────────────────────────────────────────────────────────────────────
 
 app = FastAPI(title="Parking Detection System")
@@ -27,8 +35,8 @@ app = FastAPI(title="Parking Detection System")
 DASHBOARD_DIR = Path(__file__).parent.parent / "dashboard"
 DASHBOARD_FILE = Path(__file__).parent / "dashboard.html"
 STATE_FILE = Path(__file__).parent / "state.json"
-TOTAL_SPOTS = 7
-STALE_AFTER_HOURS = 24
+TOTAL_SPOTS: int = int(os.environ.get("TOTAL_SPOTS", "7"))
+STALE_AFTER_HOURS: int = int(os.environ.get("STALE_AFTER_HOURS", "24"))
 
 # ── State ────────────────────────────────────────────────────────────────────
 # {name: {dongle_id, status, since, manual}}
@@ -37,17 +45,18 @@ def _load_state() -> dict[str, dict]:
     try:
         if STATE_FILE.exists():
             return json.loads(STATE_FILE.read_text())
-    except Exception:
-        pass
+    except (OSError, json.JSONDecodeError) as exc:
+        log.warning("Could not load state file, starting fresh: %s", exc)
     return {}
 
 def _save_state(state: dict) -> None:
     try:
         STATE_FILE.write_text(json.dumps(state))
-    except Exception:
-        pass
+    except OSError as exc:
+        log.error("Failed to persist state to %s: %s", STATE_FILE, exc)
 
 parking_state: dict[str, dict] = _load_state()
+_state_lock = asyncio.Lock()
 
 # ── Occupancy ─────────────────────────────────────────────────────────────────
 
@@ -78,7 +87,8 @@ class ConnectionManager:
         for ws in self.connections:
             try:
                 await ws.send_text(message)
-            except Exception:
+            except Exception as exc:
+                log.debug("WS send failed, marking dead: %s", exc)
                 dead.append(ws)
         for ws in dead:
             self.disconnect(ws)
@@ -98,20 +108,21 @@ class ParkEvent(BaseModel):
 
 @app.post("/api/park")
 async def park(event: ParkEvent):
-    already_parked = parking_state.get(event.name, {}).get("status") == "parked"
-    occ = _occupancy()
-    warning = None
-    if event.status == "parked" and occ["full"] and not already_parked:
-        warning = "lot_full"
+    async with _state_lock:
+        already_parked = parking_state.get(event.name, {}).get("status") == "parked"
+        occ = _occupancy()
+        warning = None
+        if event.status == "parked" and occ["full"] and not already_parked:
+            warning = "lot_full"
 
-    parking_state[event.name] = {
-        "dongle_id": event.dongle_id,
-        "status": event.status,
-        "since": datetime.now(timezone.utc).isoformat(),
-        "manual": event.manual,
-    }
-    _save_state(parking_state)
-    await manager.broadcast(_payload())
+        parking_state[event.name] = {
+            "dongle_id": event.dongle_id,
+            "status": event.status,
+            "since": datetime.now(timezone.utc).isoformat(),
+            "manual": event.manual,
+        }
+        _save_state(parking_state)
+        await manager.broadcast(_payload())
     return {"ok": True, **({"warning": warning} if warning else {})}
 
 
@@ -127,10 +138,11 @@ async def websocket_endpoint(ws: WebSocket):
     try:
         while True:
             await asyncio.sleep(30)
-            await ws.send_text(json.dumps(_payload()))
+            await ws.send_text('{"type":"ping"}')
     except WebSocketDisconnect:
         manager.disconnect(ws)
-    except Exception:
+    except Exception as exc:
+        log.warning("Unexpected WebSocket error, disconnecting: %s", exc)
         manager.disconnect(ws)
 
 
@@ -149,18 +161,19 @@ async def _stale_cleanup():
         await asyncio.sleep(3600)
         cutoff = datetime.now(timezone.utc) - timedelta(hours=STALE_AFTER_HOURS)
         changed = False
-        for name, entry in parking_state.items():
-            if entry.get("status") == "parked":
-                try:
-                    since = datetime.fromisoformat(entry["since"])
-                    if since < cutoff:
-                        entry["status"] = "unknown"
-                        changed = True
-                except Exception:
-                    pass
-        if changed:
-            _save_state(parking_state)
-            await manager.broadcast(_payload())
+        async with _state_lock:
+            for name, entry in parking_state.items():
+                if entry.get("status") == "parked":
+                    try:
+                        since = datetime.fromisoformat(entry["since"])
+                        if since < cutoff:
+                            entry["status"] = "unknown"
+                            changed = True
+                    except (KeyError, ValueError) as exc:
+                        log.warning("Bad 'since' value for %s in stale check: %s", name, exc)
+            if changed:
+                _save_state(parking_state)
+                await manager.broadcast(_payload())
 
 
 @app.on_event("startup")
@@ -171,6 +184,5 @@ async def startup():
 # ── Entry point ───────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    import os
     port = int(os.environ.get("PORT", 8000))
     uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)
